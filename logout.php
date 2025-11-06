@@ -1,25 +1,11 @@
 <?php
 session_start();
 
-// Cek apakah user sudah login
-if (isset($_SESSION['username'])) {
-    header("Location: dashboard.php");
-    exit;
-}
+// Hapus semua session
+session_unset();
+session_destroy();
 
-// Proses login saat form dikirim
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $username = $_POST['username'] ?? '';
-    $password = $_POST['password'] ?? '';
-
-    // Login sederhana (username: admin, password: 123)
-    if ($username == 'arimbi' && $password === '12345') {
-        $_SESSION['username'] = $username;
-        $_SESSION['role'] = 'Dosen';
-        header("Location: dashboard.php");
-        exit;
-    } else {
-        $error = "Username atau password salah!";
-    }
-}
+// Kembali ke halaman login
+header("Location: login.php");
+exit;
 ?>
