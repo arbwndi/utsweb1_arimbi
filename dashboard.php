@@ -1,239 +1,188 @@
 <?php
 session_start();
 
-// Pastikan user login
+// Jika belum login
 if (!isset($_SESSION['username'])) {
-    header("Location: index.php");
+    header("Location: login.php");
     exit;
 }
 
-// Daftar produk
-$barang = [
-    ["kode" => "B001", "nama" => "LAPTOP", "harga" => 50000],
-    ["kode" => "B002", "nama" => "PRINTER", "harga" => 30000],
-    ["kode" => "B003", "nama" => "SCANNER", "harga" => 20000],
-    ["kode" => "B004", "nama" => "FLASHDISK", "harga" => 10000],
-    ["kode" => "B005", "nama" => "MOUSE", "harga" => 8000],
-];
 
-// Random pembelian
-$detail_pembelian = [];
-$grandtotal = 0;
 
-foreach ($barang as $item) {
-    $beli = rand(0, 1); // 0 = tidak dibeli, 1 = dibeli
-    if ($beli === 1) {
-        $jumlah = rand(1, 5);
-        $total_item = $item['harga'] * $jumlah;
-        $grandtotal += $total_item;
-        $detail_pembelian[] = [
-            'kode' => $item['kode'],
-            'nama' => $item['nama'],
-            'harga' => $item['harga'],
-            'jumlah' => $jumlah,
-            'total' => $total_item
-        ];
+// Tambah barang ke keranjang
+if (isset($_POST['tambah'])) {
+    $kode = $_POST['kode'];
+    $nama = $_POST['nama'];
+    $harga = $_POST['harga'];
+    $jumlah = $_POST['jumlah'];
+
+    $total = $harga * $jumlah;
+
+    $_SESSION['keranjang'][] = [
+        'kode' => $kode,
+        'nama' => $nama,
+        'harga' => $harga,
+        'jumlah' => $jumlah,
+        'total' => $total
+    ];
+}
+
+// Kosongkan keranjang
+if (isset($_POST['clear'])) {
+    unset($_SESSION['keranjang']);
+}
+
+// Hitung total
+$totalBelanja = 0;
+if (isset($_SESSION['keranjang'])) {
+    foreach ($_SESSION['keranjang'] as $b) {
+        $totalBelanja += $b['total'];
     }
 }
 
-// Hitung diskon
-$diskon = 0;
-if ($grandtotal > 100000) {
-    $diskon = $grandtotal * 0.10; // diskon 10%
-}
-$total_akhir = $grandtotal - $diskon;
+$diskon = $totalBelanja * 0.10;
+$totalBayar = $totalBelanja - $diskon;
+
 ?>
 <!DOCTYPE html>
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-<title>Dashboard - POLGAN MART</title>
+<title>Dashboard Penjualan</title>
 <style>
-    /* ---------- STYLE UMUM ---------- */
-    body {
-        font-family: 'Segoe UI', Tahoma, sans-serif;
-        background: linear-gradient(135deg, #e3f2fd, #e8f5e9);
-        color: #333;
-        margin: 0;
-        padding: 0;
-    }
-
-    .navbar {
-        background-color: #007bff;
-        color: white;
-        padding: 15px 40px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-    }
-
-    .navbar h1 {
-        margin: 0;
-        font-size: 1.4em;
-        letter-spacing: 1px;
-    }
-
-    .navbar .user-info {
-        font-size: 0.9em;
-    }
-
-    .navbar a {
-        color: #fff;
-        text-decoration: none;
-        font-weight: bold;
-        margin-left: 20px;
-        background-color: #dc3545;
-        padding: 6px 12px;
-        border-radius: 5px;
-    }
-
-    .navbar a:hover {
-        background-color: #b52a36;
-    }
-
-    /* ---------- KARTU KONTEN ---------- */
-    .container {
-        width: 85%;
-        max-width: 950px;
-        margin: 40px auto;
-        background: #fff;
-        border-radius: 12px;
-        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-        padding: 30px 40px;
-    }
-
-    h2 {
-        color: #004d40;
-        text-align: center;
-        margin-top: 0;
-        font-size: 1.6em;
-    }
-
-    p.desc {
-        text-align: center;
-        font-size: 0.9em;
-        color: #777;
-        margin-top: -5px;
-        margin-bottom: 20px;
-    }
-
-    /* ---------- TABEL ---------- */
-    table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-top: 10px;
-    }
-
-    th, td {
-        padding: 12px 14px;
-        text-align: left;
-    }
-
-    th {
-        background-color: #e3f2fd;
-        color: #333;
-        font-weight: bold;
-        border-bottom: 2px solid #90caf9;
-    }
-
-    tbody tr:nth-child(even) {
-        background-color: #f9f9f9;
-    }
-
-    tbody tr:hover {
-        background-color: #e1f5fe;
-        transition: 0.2s;
-    }
-
-    .right {
-        text-align: right;
-    }
-
-    /* ---------- TOTAL ---------- */
-    tfoot td {
-        font-weight: bold;
-        border-top: 2px solid #ccc;
-        padding-top: 15px;
-    }
-
-    .total-akhir {
-        background-color: #e8f5e9;
-        color: #2e7d32;
-    }
-
-    .diskon {
-        color: #388e3c;
-    }
-
-    /* ---------- FOOTER ---------- */
-    footer {
-        text-align: center;
-        margin: 30px 0 20px;
-        font-size: 0.85em;
-        color: #666;
-    }
+body{
+    font-family: Arial, sans-serif;
+    background: #eef1f7;
+    margin:0;
+    padding:0;
+}
+.navbar{
+    display:flex;
+    justify-content:space-between;
+    padding:20px;
+    background:white;
+    box-shadow:0 2px 4px rgba(0,0,0,0.1);
+}
+.container{
+    width:80%;
+    margin:30px auto;
+    background:white;
+    padding:30px;
+    border-radius:15px;
+    box-shadow:0 4px 10px rgba(0,0,0,0.1);
+}
+input,button{
+    padding:12px;
+    width:100%;
+    margin-top:5px;
+    border-radius:8px;
+    border:1px solid #ccc;
+}
+button{
+    width:auto;
+    background:#0d6efd;
+    color:white;
+    border:none;
+    cursor:pointer;
+    margin-right:10px;
+}
+button:hover{
+    opacity:0.8;
+}
+table{
+    width:100%;
+    margin-top:20px;
+    border-collapse:collapse;
+}
+table th, table td{
+    border-bottom:1px solid #ddd;
+    padding:10px;
+    text-align:left;
+}
+.total-row{
+    font-weight:bold;
+    text-align:right;
+}
 </style>
 </head>
+
 <body>
-    <div class="navbar">
-        <h1>POLGAN MART</h1>
-        <div class="user-info">
-            Halo, <?= htmlspecialchars($_SESSION['username']); ?> |
-            <a href="logout.php">Logout</a>
-        </div>
+
+<div class="navbar">
+    <div><strong>--POLGAN MART--</strong><br><small>Sistem Penjualan Sederhana</small></div>
+    <div>
+        Selamat datang, <strong><?= $_SESSION['username'] ?></strong>  
+        <form method="post" action="logout.php" style="display:inline;">
+            <button style="background:#dc3545; color:white;">Logout</button>
+        </form>
     </div>
+</div>
 
-    <div class="container">
-        <h2>Dashboard Penjualan</h2>
-        <p class="desc">Daftar pembelian acak ditampilkan setiap kali halaman dimuat</p>
+<div class="container">
+    <h3>Input Barang</h3>
 
-        <table>
-            <thead>
-                <tr>
-                    <th>Kode</th>
-                    <th>Nama Barang</th>
-                    <th>Harga</th>
-                    <th>Jumlah</th>
-                    <th>Total</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php if (!empty($detail_pembelian)): ?>
-                    <?php foreach ($detail_pembelian as $item): ?>
-                    <tr>
-                        <td><?= $item['kode']; ?></td>
-                        <td><?= $item['nama']; ?></td>
-                        <td>Rp <?= number_format($item['harga'], 0, ',', '.'); ?></td>
-                        <td class="right"><?= $item['jumlah']; ?></td>
-                        <td class="right">Rp <?= number_format($item['total'], 0, ',', '.'); ?></td>
-                    </tr>
-                    <?php endforeach; ?>
-                <?php else: ?>
-                    <tr><td colspan="5" style="text-align:center; color:#888;">Tidak ada barang dibeli.</td></tr>
-                <?php endif; ?>
-            </tbody>
-            <tfoot>
-                <tr>
-                    <td colspan="4" class="right">Total Belanja:</td>
-                    <td class="right">Rp <?= number_format($grandtotal, 0, ',', '.'); ?></td>
-                </tr>
-                <?php if ($diskon > 0): ?>
-                <tr class="diskon">
-                    <td colspan="4" class="right">Diskon (10%):</td>
-                    <td class="right">- Rp <?= number_format($diskon, 0, ',', '.'); ?></td>
-                </tr>
-                <?php endif; ?>
-                <tr class="total-akhir">
-                    <td colspan="4" class="right">Total Akhir:</td>
-                    <td class="right">Rp <?= number_format($total_akhir, 0, ',', '.'); ?></td>
-                </tr>
-            </tfoot>
-        </table>
-    </div>
+    <form method="post">
 
-    <footer>
-        © <?= date('Y'); ?> POLGAN MART - Sistem Penjualan Sederhana
-    </footer>
+        <label>Kode Barang</label>
+        <input type="text" name="kode" autocomplete="off" placeholder="Masukan Kode Barang" required>
+
+        <label>Nama Barang</label>
+        <input type="text" name="nama"autocomplete="off"  placeholder="Masukan Nama Barang" required>
+
+        <label>Harga</label>
+        <input type="number" name="harga" autocomplete="off"  placeholder="Masukan Harga" required>
+
+        <label>Jumlah</label>
+        <input type="number" name="jumlah" autocomplete="off"  placeholder="Masukan Jumlah" required>
+
+        <br><br>
+        <button type="submit" name="tambah">Tambahkan</button>
+        <button type="reset" style="background:#6c757d;">Batal</button>
+    </form>
+
+    <h3 style="text-align:center; margin-top:40px;">Daftar Pembelian</h3>
+
+    <table>
+        <tr>
+            <th>Kode</th>
+            <th>Nama Barang</th>
+            <th>Harga</th>
+            <th>Jumlah</th>
+            <th>Total</th>
+        </tr>
+
+        <?php if (!empty($_SESSION['keranjang'])): ?>
+            <?php foreach ($_SESSION['keranjang'] as $b): ?>
+            <tr>
+                <td><?= $b['kode'] ?></td>
+                <td><?= $b['nama'] ?></td>
+                <td>Rp <?= number_format($b['harga'],0,',','.') ?></td>
+                <td><?= $b['jumlah'] ?></td>
+                <td>Rp <?= number_format($b['total'],0,',','.') ?></td>
+            </tr>
+            <?php endforeach; ?>
+        <?php endif; ?>
+
+        <tr class="total-row">
+            <td colspan="4">Total Belanja</td>
+            <td>Rp <?= number_format($totalBelanja,0,',','.') ?></td>
+        </tr>
+
+        <tr class="total-row">
+            <td colspan="4">Diskon (10%)</td>
+            <td>Rp <?= number_format($diskon,0,',','.') ?></td>
+        </tr>
+
+        <tr class="total-row">
+            <td colspan="4">Total Bayar</td>
+            <td>Rp <?= number_format($totalBayar,0,',','.') ?></td>
+        </tr>
+    </table>
+
+    <form method="post">
+        <button name="clear" style="background:#dc3545; margin-top:20px;">Kosongkan Keranjang</button>
+    </form>
+</div>
+
 </body>
 </html>
