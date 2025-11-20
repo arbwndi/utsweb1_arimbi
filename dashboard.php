@@ -119,26 +119,63 @@ table th, table td{
 </div>
 
 <div class="container">
-    <h3>Input Barang</h3>
+   <h3>Input Barang</h3>
 
-    <form method="post">
+<form method="post">
 
-        <label>Kode Barang</label>
-        <input type="text" name="kode" autocomplete="off" placeholder="Masukan Kode Barang" required>
+    <label>Kode Barang</label>
+    <input type="text" name="kode" list="kodelist" id="kode" placeholder="Masukan Kode Barang" required>
 
-        <label>Nama Barang</label>
-        <input type="text" name="nama"autocomplete="off"  placeholder="Masukan Nama Barang" required>
+    <datalist id="kodelist">
+        <option value="B001">B001</option>
+        <option value="B002">B002</option>
+        <option value="B003">B003</option>
+    </datalist>
 
-        <label>Harga</label>
-        <input type="number" name="harga" autocomplete="off"  placeholder="Masukan Harga" required>
+    <label>Nama Barang</label>
+    <input type="text" name="nama" id="nama" autocomplete="off" placeholder="Masukan Nama Barang" required>
 
-        <label>Jumlah</label>
-        <input type="number" name="jumlah" autocomplete="off"  placeholder="Masukan Jumlah" required>
+    <label>Harga</label>
+    <input type="number" name="harga" id="harga" autocomplete="off" placeholder="Masukan Harga" required>
 
-        <br><br>
+    <label>Jumlah</label>
+    <input type="number" name="jumlah" autocomplete="off" placeholder="Masukan Jumlah" required>
+
+    <br><br>
         <button type="submit" name="tambah">Tambahkan</button>
         <button type="reset" style="background:#6c757d;">Batal</button>
-    </form>
+</form>
+
+<script>
+    // Data barang (bisa kamu tambah sendiri)
+    const barangData = {
+        "B001": { nama: "Laptop", harga: 3000000 },
+        "B002": { nama: "I pad", harga: 5000000 },
+        "B003": { nama: "Printer", harga: 4000000 }
+    };
+
+    const kodeInput = document.getElementById("kode");
+    const namaInput = document.getElementById("nama");
+    const hargaInput = document.getElementById("harga");
+
+    // Saat kode barang dipilih → otomatis isi nama & harga
+    kodeInput.addEventListener("input", function () {
+        const kode = this.value;
+
+        if (barangData[kode]) {
+            namaInput.value = barangData[kode].nama;
+            hargaInput.value = barangData[kode].harga;
+        } else {
+            // Jika kode tidak ada dalam list, kosongkan lagi
+            namaInput.value = "";
+            hargaInput.value = "";
+        }
+    });
+</script>
+
+
+        
+    
 
     <h3 style="text-align:center; margin-top:40px;">Daftar Pembelian</h3>
 
