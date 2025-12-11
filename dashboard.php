@@ -40,8 +40,21 @@ if (isset($_SESSION['keranjang'])) {
     }
 }
 
-$diskon = $totalBelanja * 0.10;
+
+$diskon = 0; // default tidak ada diskon
+
+if ($totalBelanja > 1000000) {
+    // jika belanja lebih dari 1 juta, diskon 10%
+    $diskon = $totalBelanja * 0.10;
+}
+
 $totalBayar = $totalBelanja - $diskon;
+
+echo "Total Belanja: Rp " . number_format($totalBelanja, 0, ',', '.');
+echo "<br>Diskon: Rp " . number_format($diskon, 0, ',', '.');
+echo "<br>Total Bayar: Rp " . number_format($totalBayar, 0, ',', '.');
+
+
 
 ?>
 <!DOCTYPE html>
